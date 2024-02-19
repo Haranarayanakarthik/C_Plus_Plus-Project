@@ -1,0 +1,118 @@
+#include <iostream>
+#include <vector>
+#include <string>
+#include <algorithm>
+
+using namespace std;
+
+class Ticket {
+public:
+    Ticket(int seatNumber, const string& passengerName)
+        : seatNumber(seatNumber), passengerName(passengerName) {}
+
+    int getSeatNumber() const {
+        return seatNumber;
+    }
+
+    const string& getPassengerName() const {
+        return passengerName;
+    }
+
+private:
+    int seatNumber;
+    string passengerName;
+};
+
+class Train {
+public:
+    Train(int totalSeats) : totalSeats(totalSeats) {
+        for (int i = 1; i <= totalSeats; ++i) {
+            availableSeats.push_back(i);
+        }
+    }
+
+    void displayAvailableSeats() const {
+        cout << "Available Seats: ";
+        for (int seat : availableSeats) {
+            cout << seat << " ";
+        }
+        cout << endl;
+    }
+
+    bool bookTicket(const string& passengerName) {
+        if (availableSeats.empty()) {
+            cout << "Sorry, the train is fully booked." << endl;
+            return false;
+        }
+
+        int seatNumber = availableSeats.back();
+        availableSeats.pop_back();
+        Ticket ticket(seatNumber, passengerName);
+        bookedTickets.push_back(ticket);
+
+        cout << "Ticket booked successfully. Seat number: " << seatNumber << endl;
+        return true;
+    }
+
+    void cancelTicket(int seatNumber) {
+        auto it = find_if(bookedTickets.begin(), bookedTickets.end(),
+                               [seatNumber](const Ticket& ticket) {
+                                   return ticket.getSeatNumber() == seatNumber;
+                               });
+
+        if (it != bookedTickets.end()) {
+            availableSeats.push_back(seatNumber);
+            bookedTickets.erase(it);
+            cout << "Ticket canceled successfully. Seat number: " << seatNumber << endl;
+        } else {
+            cout << "Ticket not found. Please enter a valid seat number." << endl;
+        }
+    }
+
+private:
+    int totalSeats;
+    vector<int> availableSeats;
+    vector<Ticket> bookedTickets;
+};
+
+int main() {
+    Train train(50); // Assume the train has 50 seats
+
+    int choice;
+    do {
+        cout << "\n1. Display Available Seats"
+             << "\n2. Book a Ticket"
+             << "\n3. Cancel a Ticket"
+             << "\n4. Exit"
+             << "\nEnter your choice: ";
+        cin >> choice;
+
+        switch (choice) {
+            case 1:
+                train.displayAvailableSeats();
+                break;
+            case 2: {
+                string passengerName;
+                cout << "Enter passenger name: ";
+                cin.ignore();
+                getline(cin, passengerName);
+                train.bookTicket(passengerName);
+                break;
+            }
+            case 3: {
+                int seatNumber;
+                cout << "Enter seat number to cancel: ";
+                cin >> seatNumber;
+                train.cancelTicket(seatNumber);
+                break;
+            }
+            case 4:
+                cout << "Exiting the program. Goodbye!" << endl;
+                break;
+            default:
+                cout << "Invalid choice. Please enter a valid option." << endl;
+        }
+    } while (choice != 4);
+
+    return 0;
+}
